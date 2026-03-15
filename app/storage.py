@@ -111,10 +111,8 @@ def init_db() -> bool:
 
 
 def get_count() -> int:
-    conn = _connect()
-    row = conn.execute("SELECT COUNT(*) AS cnt FROM templates").fetchone()
-    conn.close()
-    return row['cnt']
+    """Alias for count_templates() — kept for backward compatibility."""
+    return count_templates()
 
 
 def _row_to_dict(row: sqlite3.Row) -> dict:
@@ -127,22 +125,39 @@ def _row_to_dict(row: sqlite3.Row) -> dict:
     return d
 
 
-def list_templates(query: Optional[str] = None) -> list[dict]:
-    """List templates (without code). Optional substring search by name/description/tags."""
+def count_templates() -> int:
+    """Return total number of templates."""
+    conn = _connect()
+    count = conn.execute("SELECT COUNT(*) FROM templates").fetchone()[0]
+    conn.close()
+    return count
+
+
+def list_templates(query: Optional[str] = None, offset: int = 0, limit: int = 0) -> list[dict]:
+    """List templates (without code). Optional substring search by name/description/tags.
+
+    Args:
+        query: Substring filter (LIKE) on name/description/tags.
+        offset: Skip first N rows (for pagination).
+        limit: Max rows to return (0 = unlimited).
+    """
     conn = _connect()
     if query:
         q = f"%{query}%"
-        rows = conn.execute(
-            "SELECT id, name, description, tags, created_at, updated_at FROM templates "
-            "WHERE name LIKE ? OR description LIKE ? OR tags LIKE ? "
-            "ORDER BY updated_at DESC",
-            (q, q, q)
-        ).fetchall()
+        sql = ("SELECT id, name, description, tags, created_at, updated_at FROM templates "
+               "WHERE name LIKE ? OR description LIKE ? OR tags LIKE ? "
+               "ORDER BY updated_at DESC")
+        params: list = [q, q, q]
     else:
-        rows = conn.execute(
-            "SELECT id, name, description, tags, created_at, updated_at FROM templates "
-            "ORDER BY updated_at DESC"
-        ).fetchall()
+        sql = ("SELECT id, name, description, tags, created_at, updated_at FROM templates "
+               "ORDER BY updated_at DESC")
+        params = []
+
+    if limit > 0:
+        sql += " LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
+
+    rows = conn.execute(sql, params).fetchall()
     conn.close()
     return [_row_to_dict(r) for r in rows]
 

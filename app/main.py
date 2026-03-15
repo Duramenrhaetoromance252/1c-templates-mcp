@@ -49,19 +49,36 @@ def templatesearch(query: str) -> str:
 
 
 @mcp.tool()
-def list_templates() -> str:
-    """List all templates (id, name, description, tags) without code.
+def list_templates(offset: int = 0, limit: int = 50) -> str:
+    """List templates (id, name, description, tags) without code — paginated.
+
+    The database contains hundreds of templates. Use `templatesearch` to find
+    specific templates by keyword instead of browsing the full list.
+
+    Args:
+        offset: Number of templates to skip (default 0).
+        limit: Maximum number of templates to return (default 50, max 200).
 
     Returns:
-        JSON array of template summaries.
+        JSON with total count, pagination info, and template summaries.
     """
     import json
-    templates = storage.list_templates()
+    offset = max(0, offset)
+    limit = max(1, min(limit, 200))
+    total = storage.count_templates()
+    templates = storage.list_templates(offset=offset, limit=limit)
     summaries = [
         {"id": t["id"], "name": t["name"], "description": t["description"][:200], "tags": t["tags"]}
         for t in templates
     ]
-    return json.dumps(summaries, ensure_ascii=False, indent=2)
+    result = {
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+        "hint": f"Showing {len(summaries)} of {total} templates. Use 'templatesearch' for keyword search.",
+        "templates": summaries,
+    }
+    return json.dumps(result, ensure_ascii=False, indent=2)
 
 
 @mcp.tool()

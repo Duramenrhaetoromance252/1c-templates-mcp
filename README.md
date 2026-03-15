@@ -43,7 +43,7 @@ docker compose up -d
 | Инструмент | Параметры | Описание |
 |------------|-----------|----------|
 | `templatesearch` | `query: str` | Гибридный семантический + полнотекстовый поиск шаблонов |
-| `list_templates` | - | Список всех шаблонов (id, name, description, tags) без кода |
+| `list_templates` | `offset?, limit?` | Список шаблонов с пагинацией (по умолчанию 50, макс 200). Для поиска используйте `templatesearch` |
 | `get_template` | `template_id: int` | Получить полный шаблон с кодом по ID |
 | `add_template` | `name, description, code, tags?` | Добавить новый шаблон |
 | `update_template` | `template_id, name?, description?, code?, tags?` | Обновить существующий шаблон |
